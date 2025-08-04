@@ -3,7 +3,7 @@ from __future__ import annotations
 import pendulum
 
 from airflow.models.dag import DAG
-from airflow.sensors.google_cloud_storage import GoogleCloudStorageObjectSensor
+from airflow.providers.google.cloud.sensors.gcs import GCSObjectExistenceSensor
 from airflow.operators.dummy import DummyOperator
 
 with DAG(
@@ -14,7 +14,7 @@ with DAG(
     tags=["gcs", "sensor"],
 ) as dag:
     # This sensor waits for a specific object (file) to appear in the GCS bucket.
-    wait_for_file = GoogleCloudStorageObjectSensor(
+    wait_for_file = GCSObjectExistenceSensor(
         task_id="wait_for_my_erp_file",
         bucket="airflow-bucket-tuova",  # Your bucket name
         object="data/erp/2025/august/file.txt",  # The specific file path within the bucket
