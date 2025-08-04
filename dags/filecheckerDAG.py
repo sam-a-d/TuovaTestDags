@@ -4,7 +4,7 @@ import pendulum
 
 from airflow.models.dag import DAG
 from airflow.providers.google.cloud.sensors.gcs import GCSObjectExistenceSensor
-from airflow.operators.dummy import DummyOperator
+from airflow.operators.empty import EmptyOperator  # Updated import
 
 with DAG(
     dag_id="gcs_file_presence_detector",
@@ -20,13 +20,13 @@ with DAG(
         object="data/erp/2025/august/file.txt",  # The specific file path within the bucket
         google_cloud_conn_id="google_cloud_default",
         mode="reschedule",  # Recommended for long waits with triggerer enabled
-        poke_interval=10,  # Check every 30 seconds
-        timeout=60 * 60 ,  # Timeout after 1 hours 
-        deferrable=True, # Explicitly mark as deferrable
+        poke_interval=10,  # Check every 10 seconds
+        timeout=60 * 60,  # Timeout after 1 hour
+        deferrable=True,  # Explicitly mark as deferrable
     )
 
     # This task will run only after 'wait_for_file' successfully detects the file.
-    file_detected_task = DummyOperator(
+    file_detected_task = EmptyOperator(  # Changed to EmptyOperator
         task_id="erp_file_has_been_detected",
     )
 
