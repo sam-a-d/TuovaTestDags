@@ -1,6 +1,9 @@
 from airflow.decorators import dag, task
 from datetime import datetime
 
+import tuovaEtl
+
+
 @dag(
     start_date=datetime(2023, 1, 1),
     schedule="@once",
