@@ -1,5 +1,5 @@
 from airflow import DAG
-from airflow.utils.dates import days_ago
+from datetime import timedelta
 from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 from airflow.operators.python import PythonOperator
 
@@ -24,7 +24,7 @@ def test_snowflake_connection():
 # Define the DAG
 with DAG(
     dag_id='test_snowflake_connection',
-    default_args={'owner': 'airflow', 'start_date': days_ago(1)},
+    default_args={'owner': 'airflow', 'start_date': '2025-08-07', 'retries': 1},
     schedule_interval=None,  # Run this only manually
     catchup=False,
 ) as dag:
