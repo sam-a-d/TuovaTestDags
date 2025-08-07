@@ -1,36 +1,36 @@
-from airflow import DAG
-from datetime import timedelta
+from airflow.decorators import dag, task
+from datetime import datetime
 from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
-from airflow.operators.python import PythonOperator
 
-def test_snowflake_connection():
-    # Set up the connection
-    snowflake_hook = SnowflakeHook(snowflake_conn_id='snowflake_conn')
-
-    # Get connection details and execute a test query
-    conn = snowflake_hook.get_conn()
-    cursor = conn.cursor()
-
-    try:
-        # Run a simple test query (e.g., SELECT CURRENT_VERSION())
-        cursor.execute("SELECT CURRENT_VERSION();")
-        result = cursor.fetchone()  # Fetch the result
-        print(f"Snowflake version: {result[0]}")  # This will print the Snowflake version
-    except Exception as e:
-        print(f"Error: {e}")
-    finally:
-        cursor.close()
-
-# Define the DAG
-with DAG(
-    dag_id='test_snowflake_connection',
-    default_args={'owner': 'airflow', 'start_date': '2025-08-07', 'retries': 1},
-    schedule_interval=None,  # Run this only manually
+@dag(
+    start_date=datetime(2025, 8, 7),
+    schedule="@once",  # Run manually only
     catchup=False,
-) as dag:
+    tags=["test", "snowflake"],
+)
+def test_snowflake_connection_dag():
+    @task
+    def test_connection():
+        # Set up the connection
+        snowflake_hook = SnowflakeHook(snowflake_conn_id='snowflake_conn')
 
-    test_connection = PythonOperator(
-        task_id='test_snowflake_connection',
-        python_callable=test_snowflake_connection
-    )
+        # Get connection details and execute a test query
+        conn = snowflake_hook.get_conn()
+        cursor = conn.cursor()
 
+        try:
+            # Run a simple test query
+            cursor.execute("SELECT CURRENT_VERSION();")
+            result = cursor.fetchone()
+            print(f"Snowflake version: {result[0]}")
+            return f"Success! Snowflake version: {result[0]}"
+        except Exception as e:
+            print(f"Error: {e}")
+            raise
+        finally:
+            cursor.close()
+            conn.close()
+
+    test_connection()
+
+dag = test_snowflake_connection_dag()
