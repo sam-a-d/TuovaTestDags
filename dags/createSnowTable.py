@@ -1,8 +1,8 @@
 from datetime import datetime
 from airflow import DAG
-from airflow.providers.snowflake.operators.snowflake import SnowflakeSqlOperator
+from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 
-SNOWFLAKE_CONN_ID = "snowflake_conn"  # change if yours is different
+CONN_ID = "snowflake_default"  # your Snowflake connection in Airflow
 
 CREATE_TABLE_SQL = """
 CREATE OR REPLACE TABLE my_stage_table (
@@ -15,27 +15,27 @@ CREATE OR REPLACE TABLE my_stage_table (
 INSERT_DUMMY_SQL = """
 INSERT INTO my_stage_table (id, name, created_at) VALUES
   (1, 'Alice', CURRENT_TIMESTAMP),
-  (2, 'Bob',   CURRENT_TIMESTAMP),
+  (2, 'Bob', CURRENT_TIMESTAMP),
   (3, 'Charlie', CURRENT_TIMESTAMP);
 """
 
 with DAG(
     dag_id="snowflake_create_and_insert_test",
     start_date=datetime(2025, 8, 1),
-    schedule=None,       # manual only
+    schedule=None,   # manual trigger
     catchup=False,
     tags=["snowflake", "test"],
 ) as dag:
 
-    create_table = SnowflakeSqlOperator(
+    create_table = SQLExecuteQueryOperator(
         task_id="create_table",
-        snowflake_conn_id=SNOWFLAKE_CONN_ID,
+        conn_id=CONN_ID,
         sql=CREATE_TABLE_SQL,
     )
 
-    insert_dummy = SnowflakeSqlOperator(
+    insert_dummy = SQLExecuteQueryOperator(
         task_id="insert_dummy",
-        snowflake_conn_id=SNOWFLAKE_CONN_ID,
+        conn_id=CONN_ID,
         sql=INSERT_DUMMY_SQL,
     )
 
