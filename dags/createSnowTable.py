@@ -2,10 +2,10 @@ from datetime import datetime
 from airflow import DAG
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 
-CONN_ID = "snowflake_default"  # your Snowflake connection in Airflow
+CONN_ID = "snowflake_conn"  # your Snowflake connection in Airflow
 
 CREATE_TABLE_SQL = """
-CREATE OR REPLACE TABLE my_stage_table (
+CREATE OR REPLACE TABLE airflowTestStage (
     id INT,
     name STRING,
     created_at TIMESTAMP
@@ -13,7 +13,7 @@ CREATE OR REPLACE TABLE my_stage_table (
 """
 
 INSERT_DUMMY_SQL = """
-INSERT INTO my_stage_table (id, name, created_at) VALUES
+INSERT INTO airflowTestStage (id, name, created_at) VALUES
   (1, 'Alice', CURRENT_TIMESTAMP),
   (2, 'Bob', CURRENT_TIMESTAMP),
   (3, 'Charlie', CURRENT_TIMESTAMP);
