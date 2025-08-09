@@ -1,43 +1,40 @@
-from airflow import DAG
-from airflow.providers.snowflake.operators.snowflake import SnowflakeOperator
 from datetime import datetime
+from airflow import DAG
+from airflow.providers.snowflake.operators.snowflake import SnowflakeSqlOperator
 
-# Snowflake connection ID in Airflow
-SNOWFLAKE_CONN_ID = "snowflake_conn"
+SNOWFLAKE_CONN_ID = "snowflake_conn"  # change if yours is different
 
-# SQL to create a simple table
 CREATE_TABLE_SQL = """
-CREATE OR REPLACE TABLE airflowStageTable (
+CREATE OR REPLACE TABLE my_stage_table (
     id INT,
     name STRING,
     created_at TIMESTAMP
 )
 """
 
-# SQL to insert dummy data
 INSERT_DUMMY_SQL = """
-INSERT INTO airflowStageTable (id, name, created_at) VALUES
-    (1, 'Alice', CURRENT_TIMESTAMP),
-    (2, 'Bob', CURRENT_TIMESTAMP),
-    (3, 'Charlie', CURRENT_TIMESTAMP)
+INSERT INTO my_stage_table (id, name, created_at) VALUES
+  (1, 'Alice', CURRENT_TIMESTAMP),
+  (2, 'Bob',   CURRENT_TIMESTAMP),
+  (3, 'Charlie', CURRENT_TIMESTAMP);
 """
 
 with DAG(
     dag_id="snowflake_create_and_insert_test",
     start_date=datetime(2025, 8, 1),
-    schedule=None,  # Manual trigger only
+    schedule=None,       # manual only
     catchup=False,
     tags=["snowflake", "test"],
 ) as dag:
 
-    create_table = SnowflakeOperator(
-        task_id="create_table_in_stage",
+    create_table = SnowflakeSqlOperator(
+        task_id="create_table",
         snowflake_conn_id=SNOWFLAKE_CONN_ID,
         sql=CREATE_TABLE_SQL,
     )
 
-    insert_dummy = SnowflakeOperator(
-        task_id="insert_dummy_data",
+    insert_dummy = SnowflakeSqlOperator(
+        task_id="insert_dummy",
         snowflake_conn_id=SNOWFLAKE_CONN_ID,
         sql=INSERT_DUMMY_SQL,
     )
